@@ -18,9 +18,9 @@
     <version>6.0.0</version>
   </parent>
 
-  <groupId>com.simpligility.maven.plugins</groupId>
+  <groupId>com.github.msx80</groupId>
   <artifactId>android-maven-plugin</artifactId>
-  <version>4.6.1-SNAPSHOT</version>
+  <version>4.6.2-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Android Maven Plugin - android-maven-plugin</name>
