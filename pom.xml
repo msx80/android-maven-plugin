@@ -20,7 +20,7 @@
 
   <groupId>com.github.msx80</groupId>
   <artifactId>android-maven-plugin</artifactId>
-  <version>4.6.2-SNAPSHOT</version>
+  <version>4.6.3-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Android Maven Plugin - android-maven-plugin</name>
@@ -121,6 +121,17 @@
   <dependencyManagement>
     <dependencies>
 
+<dependency>
+   <groupId>javax.xml.bind</groupId>
+   <artifactId>jaxb-api</artifactId>
+   <version>2.3.1</version>
+</dependency>
+<dependency>
+   <groupId>org.glassfish.jaxb</groupId>
+   <artifactId>jaxb-runtime</artifactId>
+   <version>2.3.2</version>
+</dependency>      
+      
       <dependency>
         <groupId>org.codehaus.plexus</groupId>
         <artifactId>plexus-archiver</artifactId>
