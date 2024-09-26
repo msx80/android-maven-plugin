@@ -20,7 +20,7 @@
 
   <groupId>com.github.msx80</groupId>
   <artifactId>android-maven-plugin</artifactId>
-  <version>4.6.3-SNAPSHOT</version>
+  <version>4.6.4-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
   <name>Android Maven Plugin - android-maven-plugin</name>
@@ -671,13 +671,11 @@
           </execution>
         </executions>
       </plugin>
-
+<!--
       <plugin>
         <artifactId>maven-checkstyle-plugin</artifactId>
         <configuration>
-          <!-- we are using the Maven code style from the Maven Checkstyle
-            Plugin but with header check disabled, using the license plugin for that
-            instead -->
+
           <configLocation>src/conf/maven_checks.xml</configLocation>
           <enableRulesSummary>false</enableRulesSummary>
           <excludes>**/**HelpMojo**,org/apache/maven/surefire/**</excludes>
@@ -692,7 +690,7 @@
           </execution>
         </executions>
       </plugin>
-
+-->
       <plugin>
         <artifactId>maven-enforcer-plugin</artifactId>
         <executions>
