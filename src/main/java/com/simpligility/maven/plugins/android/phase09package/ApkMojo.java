@@ -72,6 +72,7 @@ import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -227,6 +228,11 @@ public class ApkMojo extends AbstractAndroidMojo
     @Parameter( property = "android.nativeToolchain" )
     @PullParameter( defaultValue = "arm-linux-androideabi-4.4.3" )
     private String apkNativeToolchain;
+    
+    @Parameter( property = "android.apk.fixedTimestamps" )
+    @PullParameter( defaultValue = "true" )
+    private Boolean fixedTimestamps;
+
 
     /**
      * Specifies the final name of the library output by the build (this allows
@@ -380,9 +386,55 @@ public class ApkMojo extends AbstractAndroidMojo
             // If there is a classifier specified, attach the artifact using that
             projectHelper.attachArtifact( project, AndroidExtension.APK, classifier, outputFile );
         }
+        
+        
+        try {
+        	if(fixedTimestamps)
+        	{
+        		cleanTimestamps(outputFile);
+        	}
+		
+		} catch (IOException e) {
+			throw new MojoExecutionException("failed to remove timestamps", e);
+		}
+        
     }
 
-    void createApkFile( File outputFile, boolean signWithDebugKeyStore ) throws MojoExecutionException
+    private void cleanTimestamps(File outputFile) throws ZipException, IOException 
+    {
+    	getLog().info("Cleaning timestamps");
+    	File inpFile = new File(outputFile.getAbsolutePath()+".withTimestamps");
+    	outputFile.renameTo(inpFile);
+    	
+    	try( ZipFile zipFile = new ZipFile(inpFile))
+    	{
+	    	byte[] buf = new byte[1024];
+	        Enumeration<? extends ZipEntry> entries = zipFile.entries();
+	        try(ZipOutputStream out = new ZipOutputStream(new FileOutputStream(outputFile)))
+	        {
+		        while(entries.hasMoreElements())
+		        {
+		            ZipEntry entry = entries.nextElement();
+		            // getLog().info("file: "+entry.getName()+ " "+entry.getTime());
+		            try(InputStream in = zipFile.getInputStream(entry))
+		            {
+		            	ZipEntry ze = new ZipEntry(entry.getName());
+		            	ze.setTime(347155260000L);
+		            	
+			            out.putNextEntry(ze);
+			            int len;
+			            while((len = in.read(buf)) > 0) {
+			                out.write(buf, 0, len);
+			            }
+		            }
+		            out.closeEntry();
+		        }
+	        }
+    	}
+
+	}
+
+	void createApkFile( File outputFile, boolean signWithDebugKeyStore ) throws MojoExecutionException
     {
         //this needs to come from DexMojo
         File dexFile = new File( targetDirectory, "classes.dex" );
@@ -1310,4 +1362,6 @@ public class ApkMojo extends AbstractAndroidMojo
 
         return this.pluginMetaInf;
     }
+    
+    
 }
