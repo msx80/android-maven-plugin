@@ -419,7 +419,7 @@ public class ApkMojo extends AbstractAndroidMojo
 		            try(InputStream in = zipFile.getInputStream(entry))
 		            {
 		            	ZipEntry ze = new ZipEntry(entry.getName());
-		            	ze.setTime(347155260000L);
+		            	ze.setTime(347155262000L);
 		            	
 			            out.putNextEntry(ze);
 			            int len;
