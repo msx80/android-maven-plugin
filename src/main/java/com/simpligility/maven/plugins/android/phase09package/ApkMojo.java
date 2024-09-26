@@ -16,6 +16,51 @@
  */
 package com.simpligility.maven.plugins.android.phase09package;
 
+import static com.simpligility.maven.plugins.android.InclusionExclusionResolver.filterArtifacts;
+import static com.simpligility.maven.plugins.android.common.AndroidExtension.AAR;
+import static com.simpligility.maven.plugins.android.common.AndroidExtension.APK;
+import static com.simpligility.maven.plugins.android.common.AndroidExtension.APKLIB;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.jar.JarOutputStream;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
+
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.DirectoryFileFilter;
+import org.apache.commons.io.filefilter.FileFileFilter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.maven.artifact.Artifact;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
+import org.apache.maven.plugins.shade.resource.ResourceTransformer;
+
 import com.android.sdklib.build.ApkBuilder;
 import com.android.sdklib.build.ApkCreationException;
 import com.android.sdklib.build.DuplicateFileException;
@@ -36,50 +81,6 @@ import com.simpligility.maven.plugins.android.config.PullParameter;
 import com.simpligility.maven.plugins.android.configuration.Apk;
 import com.simpligility.maven.plugins.android.configuration.MetaInf;
 import com.simpligility.maven.plugins.android.configuration.Sign;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.DirectoryFileFilter;
-import org.apache.commons.io.filefilter.FileFileFilter;
-import org.apache.commons.io.filefilter.FileFilterUtils;
-import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.maven.artifact.Artifact;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugin.MojoFailureException;
-import org.apache.maven.plugins.annotations.LifecyclePhase;
-import org.apache.maven.plugins.annotations.Mojo;
-import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.plugins.shade.resource.ResourceTransformer;
-
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.jar.JarOutputStream;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
-
-import static com.simpligility.maven.plugins.android.InclusionExclusionResolver.filterArtifacts;
-import static com.simpligility.maven.plugins.android.common.AndroidExtension.AAR;
-import static com.simpligility.maven.plugins.android.common.AndroidExtension.APK;
-import static com.simpligility.maven.plugins.android.common.AndroidExtension.APKLIB;
 
 
 
@@ -394,18 +395,19 @@ public class ApkMojo extends AbstractAndroidMojo
         		cleanTimestamps(outputFile);
         	}
 		
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new MojoExecutionException("failed to remove timestamps", e);
 		}
         
     }
 
-    private void cleanTimestamps(File outputFile) throws ZipException, IOException 
+    private void cleanTimestamps(File outputFile) throws Exception 
     {
     	getLog().info("Cleaning timestamps");
     	File inpFile = new File(outputFile.getAbsolutePath()+".withTimestamps");
     	outputFile.renameTo(inpFile);
-    	
+    	Field f = ZipEntry.class.getDeclaredField("xdostime"); //NoSuchFieldException
+    	f.setAccessible(true);
     	try( ZipFile zipFile = new ZipFile(inpFile))
     	{
 	    	byte[] buf = new byte[1024];
@@ -419,8 +421,8 @@ public class ApkMojo extends AbstractAndroidMojo
 		            try(InputStream in = zipFile.getInputStream(entry))
 		            {
 		            	ZipEntry ze = new ZipEntry(entry.getName());
-		            	ze.setTime(347158862000L);
-		            	           
+		            	//ze.setTime(347155262000L); // this is timezone-dependent
+		            	f.set(ze, 35719201);
 		            	
 			            out.putNextEntry(ze);
 			            int len;
