@@ -1,3 +1,7 @@
+This is a fork of the original codebase adding some features to keep it in working order. Builds are available on JitPack: https://jitpack.io/#msx80/android-maven-plugin
+
+Original readme follows:
+
 == ANDROID MAVEN PLUGIN
 
 image:https://img.shields.io/maven-central/v/com.simpligility.maven.plugins/android-maven-plugin.svg?label=Maven%20Central["Build Status", link="https://search.maven.org/search?q=g:%22com.simpligility.maven.plugins%22%20AND%20a:%22android-maven-plugin%22"]
